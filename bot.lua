@@ -1,3 +1,4 @@
+
 redis = (loadfile "redis.lua")()
 redis = redis.connect('127.0.0.1', 6379)
 
@@ -55,7 +56,7 @@ end
 function process_join(i, naji)
 	if naji.code_ == 429 then
 		local message = tostring(naji.message_)
-		local Time = message:match('%d+') + 1500
+		local Time = message:match('%d+')
 		redis:setex("botBOT-IDmaxjoin", tonumber(Time), true)
 	else
 		redis:srem("botBOT-IDgoodlinks", i.link)
@@ -63,12 +64,12 @@ function process_join(i, naji)
 	end
 end
 function process_link(i, naji)
-	if (naji.is_group_ or naji.is_supergroup_channel_) then
+	if (naji.is_supergroup_channel_) then
 		redis:srem("botBOT-IDwaitelinks", i.link)
 		redis:sadd("botBOT-IDgoodlinks", i.link)
 	elseif naji.code_ == 429 then
 		local message = tostring(naji.message_)
-		local Time = message:match('%d+') + 1500
+		local Time = message:match('%d+')
 		redis:setex("botBOT-IDmaxlink", tonumber(Time), true)
 	else
 		redis:srem("botBOT-IDwaitelinks", i.link)
@@ -92,7 +93,7 @@ function add(id)
 		if Id:match("^(%d+)$") then
 			redis:sadd("botBOT-IDusers", id)
 			redis:sadd("botBOT-IDall", id)
-		elseif Id:match("^-100") then
+		elseif Id:match("^-300") then
 			redis:sadd("botBOT-IDsupergroups", id)
 			redis:sadd("botBOT-IDall", id)
 		else
@@ -696,7 +697,7 @@ function tdcli_update_callback(data)
 			ID = "GetChats",
 			offset_order_ = 9223372036854775807,
 			offset_chat_id_ = 0,
-			limit_ = 20
+			limit_ = 1000
 		}, dl_cb, nil)
 	end
 end
